@@ -1,0 +1,7 @@
+title: Wei Studio
+description: Train a LeRobot ACT policy and test it in MuJoCo.
+theme: jekyll-theme-cayman
+exclude:
+  - models
+  - outputs
+  - data
