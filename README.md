@@ -6,7 +6,7 @@ Start with a Wei Studio **Table-v1 block pick-and-place** LeRobot export. The sc
 
 ### Reproduce the successful Table-v1 policy
 
-Two held-out rollouts passed the 15-second MuJoCo pick-and-place test. The block rose 18.3 cm and 9.0 cm, respectively. Both trials used the same nominal block placement and different recorded starts. [Download the complete ACT checkpoint](https://raw.githubusercontent.com/adapole/wei-studio-guide/main/table-v1/checkpoint.zip) · [Watch the measured rollout](https://raw.githubusercontent.com/adapole/wei-studio-guide/main/table-v1/held-out-rollout.mp4)
+Two held-out rollouts passed the 15-second MuJoCo pick-and-place test. The block rose 18.3 cm and 9.0 cm, respectively. Both trials used the same nominal block placement and different recorded starts. [Download the complete ACT checkpoint](table-v1/checkpoint.zip?raw=true) · [Watch the measured rollout](table-v1/held-out-rollout.mp4)
 
 Run the commands below in a Linux or WSL2 shell with Git, tar, unzip and sha256sum installed. The successful run used Python 3.13, PyTorch 2.15.0, an NVIDIA RTX 4070 Laptop GPU, and CUDA. Install the corresponding CUDA-enabled PyTorch build and a compatible driver. The frozen evaluator also uses CUDA. The training and calibration archives are distributed separately. Obtain inputs.tar.gz and orca-runtime.tar.gz from the project owner and place them in table-v1/ before running prepare. The commands below verify the artifacts, extract the exact processed dataset and validation fixtures, then score the published weights.
 
