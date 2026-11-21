@@ -3,3 +3,5 @@ __pycache__/
 models/orca_sim/
 outputs/
 data/
+/table-v1/inputs/
+/table-v1/*.tar.gz

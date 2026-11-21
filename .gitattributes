@@ -1,0 +1,3 @@
+table-v1/scripts/*.py -text
+table-v1/experiments/** -text
+*.sh text eol=lf

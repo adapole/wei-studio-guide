@@ -4,7 +4,39 @@ Start with a Wei Studio **Table-v1 block pick-and-place** LeRobot export. The sc
 
 ## Train a LeRobot ACT policy and run it in MuJoCo
 
-### Install on Linux or WSL2
+### Reproduce the successful Table-v1 policy
+
+Two held-out rollouts passed the 15-second MuJoCo pick-and-place test. The block rose 18.3 cm and 9.0 cm, respectively. Both trials used the same nominal block placement and different recorded starts. [Download the complete ACT checkpoint](https://raw.githubusercontent.com/adapole/wei-studio-guide/main/table-v1/checkpoint.zip) · [Watch the measured rollout](https://raw.githubusercontent.com/adapole/wei-studio-guide/main/table-v1/held-out-rollout.mp4)
+
+Run the commands below in a Linux or WSL2 shell with Git, tar, unzip and sha256sum installed. The successful run used Python 3.13, PyTorch 2.15.0, an NVIDIA RTX 4070 Laptop GPU, and CUDA. Install the corresponding CUDA-enabled PyTorch build and a compatible driver. The frozen evaluator also uses CUDA. The training and calibration archives are distributed separately. Obtain inputs.tar.gz and orca-runtime.tar.gz from the project owner and place them in table-v1/ before running prepare. The commands below verify the artifacts, extract the exact processed dataset and validation fixtures, then score the published weights.
+
+```bash
+git clone https://github.com/adapole/wei-studio-guide.git
+cd wei-studio-guide
+python3.13 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r table-v1/requirements.txt
+python -c 'import torch; assert torch.cuda.is_available(), "CUDA is required"'
+git clone https://github.com/orcahand/orca_sim.git models/orca_sim
+git -C models/orca_sim checkout --detach 05e00dafd0a6eb2186d69d4e351c252a7bcffadd
+bash table-v1/run.sh prepare
+bash table-v1/run.sh evaluate
+```
+
+To train from scratch and score the resulting checkpoint, continue in the same environment. Use separate output directories for the two evaluations.
+
+```bash
+bash table-v1/run.sh train
+bash table-v1/run.sh evaluate "$PWD/table-v1/outputs/train/training/checkpoints/020000/pretrained_model" "$PWD/table-v1/outputs/retrained-validation"
+```
+
+The 60 Hz dataset contains two original demonstrations and 14 qualified variations for training. The two validation demonstrations are excluded. The training adapter expresses positions relative to the initial block position and includes elapsed time. ACT trained with seed 7, batch size 32, learning rate 0.0001, environment normalization, and 20,000 optimizer steps. The evaluator requests one action per inference with temporal ensembling and blends from the measured initial hand pose for 0.2 seconds. It scores contact-supported lift, sustained hold, release and settling, joint limits, and penetration. Read the per-trial gates in the output directory's report.json. [Reference scores and checkpoint hashes](table-v1/reference-results.json) are included for comparison. The reference model.safetensors SHA-256 is `a55228f140ce6f12edc18c89cf26534c7b76a798e0b57bba0ab1b17619e8a74b`. Different hardware or software can change the trained weights.
+
+### Train on your own Studio export
+
+The following workflow uses a state-only 50 Hz Studio export. Its checkpoint uses a different feature layout from the successful 60 Hz recipe above.
+
+#### Install on Linux or WSL2
 
 Run these commands from the root of this guide. Install Git, Python 3.12 or 3.13 with venv support, and FFmpeg (for MP4 output). For headless video, install an EGL graphics driver or Mesa EGL. Training and headless simulation can both use CPU. CUDA training requires a compatible PyTorch installation and driver.
 

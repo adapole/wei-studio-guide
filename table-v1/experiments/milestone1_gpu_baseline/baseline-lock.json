@@ -1,0 +1,37 @@
+{
+  "schema": "orca.stand.gpu.baseline-lock.v1",
+  "checkpoint_date": "2026-11-16",
+  "prior_git_head": "1015c4c344c7f6a73952c2f84277a62259b186b0",
+  "scope": "bounded-command simulation policy; unseen block placements with standardized measured hand initialization and seeded physical perturbations",
+  "task_successes": 89,
+  "trials": 100,
+  "calibration_sha256": "1dee8f21505db273c64e5a4c88ad490a873af541a31fa712e6c3fb35cef753cf",
+  "checkpoint": "/home/spear/wei-m1-qualified7-seed7-v1/training/checkpoints/005000/pretrained_model",
+  "checkpoint_hashes": {
+    "policy_postprocessor.json": "c9d75f3a712cb48be8a931c90da3627f1e81bc1c62dd998d3529115e746f0aa7",
+    "model.safetensors": "ab2199eb150de7086ef32cf4464e084bee9d8acdce1ff4a3637c10deb8e7f6cc",
+    "policy_preprocessor.json": "637649ff8c2ce0e9227b7d9524e60a7167f2faad0f77cef4a0c1c25ca86d3cea",
+    "train_config.json": "b520203db1a9fad4467ee2f5b4a26e9f67794221dcb07a4f16d194694ddbb2aa",
+    "config.json": "f4a3c3064bb5cdf663a242b0bfc9e4d371697855caf5a4bd45a2480744a9369f",
+    "policy_preprocessor_step_3_normalizer_processor.safetensors": "e058ae43aa15835526383225d12a1f0432f52d8dcd984e1ec0fbb4b5dda9fdfd",
+    "policy_postprocessor_step_0_unnormalizer_processor.safetensors": "e058ae43aa15835526383225d12a1f0432f52d8dcd984e1ec0fbb4b5dda9fdfd"
+  },
+  "audit_path": "/home/spear/wei-m1-final-audit-v1.json",
+  "audit_sha256": "6ca404544aac781ed14377079b7d21016fb9f612d4a0517d4129e6dd9f5ba062",
+  "native_helper_original_path": "/home/spear/wei-m1-repair-v2/scripts",
+  "native_helper_sha256": {
+    "orca-analyze-repair-run.py": "182257f5f7da29da203bd62a2d65eeb859a6b5eee7a6fa928bc94d8ee5047780",
+    "orca-lerobot-convert.py": "669c2e0b82a013c4fc2f4943eda5eec3e73c4cb30fb5ad5675a7721bc90f00e7",
+    "orca-single-episode-repair.py": "c8c3ae3749958cb692e1db850f6c96b384b906b5cdeea8a7a0c3921eeb8f9ed9",
+    "orca-trace-replay.py": "97aa5ea3b48e2d212b0c64b6987d0e498fcbea30f14bd8a7186cea1ccf88e2d6",
+    "orca_diagnostic_trace.py": "41bc80375084b0388457b64aa1bd2c60816cee7bcb4148c12b340b0dc53bce40",
+    "orca_lerobot_policy.py": "2057afb66fa6a28ef520345c81e9e995c875517c8d784936b095310799d03d58",
+    "orca_physics.py": "55ebfd9c977bdee9c93479610240a942d6c7c9a9fa81d738fa787a4dcbba1f56",
+    "orca_policy_command_adapter.py": "22f7af4758651400ee74f50dc9c18b4db5ed163baba9966d0c55284f31beee42",
+    "orca_prediction_metrics.py": "1fd492a0e61672106e9e26f4a5f6135305bd35c5a9d2a20d4c33901a8c323e9b",
+    "orca_task_phases.py": "123d13a66eae93b21eb994fb1e06c42b7d13bf33bb96b1fb359e432be7f6ad56",
+    "orca_trace_summary.py": "3c4223d649b168096519bb8750a768b2c59f8ab9448a1fa3bf1cd6d648648607"
+  },
+  "evidence_package": "artifacts/milestone1-completion-v1",
+  "contract": "Immutable stand reference; table scene/calibration/admission must be separately versioned. No cache, raw recording, environment or weight bytes are committed."
+}

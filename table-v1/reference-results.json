@@ -1,0 +1,60 @@
+{
+  "task_version": "table-v1",
+  "split": "validation",
+  "horizon_seconds": 15,
+  "command_hz": 60,
+  "physics_dt": 0.0002,
+  "checkpoint_hashes": {
+    "config.json": "6c28df1485deb26a20760f6ade70bc25516cf9c1f5bcf0b3aba27742de1e4b64",
+    "model.safetensors": "a55228f140ce6f12edc18c89cf26534c7b76a798e0b57bba0ab1b17619e8a74b",
+    "orca-table-representation.json": "a4915e6b5d10f0bf679744bf8a33992c00e26a826795a12a4a73695013d6f4d6",
+    "policy_postprocessor.json": "03f4a6ec5ccc38578e175763d883876ad54eb73e43d66fe4d4fcc292eaa8b3c6",
+    "policy_postprocessor_step_0_unnormalizer_processor.safetensors": "08f3f541e3f6bf9ac7f322effe380afc14138eebf0bcba0f07127a8c9ae48718",
+    "policy_preprocessor.json": "9787bcd9c9843603dd9bd72b99b62e842986d392b9ba65825b573dfd50f46820",
+    "policy_preprocessor_step_3_normalizer_processor.safetensors": "08f3f541e3f6bf9ac7f322effe380afc14138eebf0bcba0f07127a8c9ae48718",
+    "train_config.json": "708bc9a570e0d8d41993af0fdd5e0247cc43633bc0e599779388dc64294664cc"
+  },
+  "bundle_manifest_sha256": "9a61d31d7b218904fd18e73fd1d952436cd9f0c7fe9045e26d57daca94bf83f9",
+  "inference_recipe": {
+    "n_action_steps": 1,
+    "temporal_ensemble_coeff": 0.01,
+    "checkpoint_weights_modified": false
+  },
+  "startup_seconds": 0.2,
+  "successes": 2,
+  "validation_report_sha256": "7a2e3ccd6993e326074e22dab96e04c5d9397f8f43d2c9a6e9b20dbc94627211",
+  "episodes": [
+    {
+      "placement_id": "table-start-01",
+      "task_passed": true,
+      "gates": {
+        "initially_resting": true,
+        "finite": true,
+        "supported_lift_hold": true,
+        "released_and_settled": true,
+        "penetration": true,
+        "joint_limits": true
+      },
+      "hold_seconds": 2.1813999999997926,
+      "settle_seconds": 2.2555999999997844,
+      "max_penetration_m": 0.0010496085491959442,
+      "policy_steps": 900
+    },
+    {
+      "placement_id": "table-start-01",
+      "task_passed": true,
+      "gates": {
+        "initially_resting": true,
+        "finite": true,
+        "supported_lift_hold": true,
+        "released_and_settled": true,
+        "penetration": true,
+        "joint_limits": true
+      },
+      "hold_seconds": 5.22600000000218,
+      "settle_seconds": 1.8615999999998276,
+      "max_penetration_m": 0.0012838986285632257,
+      "policy_steps": 900
+    }
+  ]
+}
