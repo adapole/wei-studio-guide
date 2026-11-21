@@ -1,2 +1,2 @@
-lerobot @ git+https://github.com/huggingface/lerobot.git@d490e472a5d1a207cfe0255caaaf74b6d66e4656
+lerobot[dataset] @ git+https://github.com/huggingface/lerobot.git@d490e472a5d1a207cfe0255caaaf74b6d66e4656
 mujoco==3.17.0
