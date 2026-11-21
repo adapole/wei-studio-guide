@@ -1,49 +1,55 @@
-# Wei Studio guide
+# Wei Studio | Train an Orca hand and test it in MuJoCo
 
-Wei Studio records human demonstrations with Quest hand tracking. This guide starts with a prepared LeRobot dataset and ends with a robot hand acting under a learned policy in simulation.
+Start with a Wei Studio **Table-v1 block pick-and-place** LeRobot export. The scripts train a state-based ACT policy on whole demonstrations and test the checkpoint on a simulated right Orca hand. You can run this workflow locally after recording, without a headset or a running Studio server.
 
-## Train a LeRobot ACT policy and run it in MuJoCo
+## Install on Linux or WSL2
 
-Use a Linux training machine with the Wei Studio simulation environment activated, including LeRobot, CUDA-enabled PyTorch, MuJoCo and the calibrated ORCA model assets. Run the commands from the Wei Studio **application checkout** containing `scripts/orca-policy-rollout.py`. This guide repository contains documentation. Supply your own prepared dataset and a compatible Wei recording for the initial scene. If you already have a checkpoint, skip training.
-
-### Train from a prepared dataset
-
-Set the local dataset directory and its LeRobot repository ID. Choose a fresh output directory. This example uses the compact state-based ACT architecture from the Wei pilot training script. The step count is an example training budget.
+Run these commands from the root of this guide. Install Git, Python 3.12 or 3.13 with venv support, and FFmpeg (for MP4 output). For headless video, install an EGL graphics driver or Mesa EGL. Training and headless simulation can both use CPU. CUDA training requires a compatible PyTorch installation and driver.
 
 ```bash
-DATASET=/absolute/path/to/prepared-dataset
-DATASET_ID=local/orca-qualified-pilot-train
-TRAIN="$PWD/outputs/my-act-run"
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 
-lerobot-train \
-  --dataset.repo_id="$DATASET_ID" --dataset.root="$DATASET" \
-  --policy.type=act --policy.device=cuda --policy.push_to_hub=false \
-  --policy.pretrained_backbone_weights=null --policy.chunk_size=30 \
-  --policy.n_action_steps=1 --policy.dim_model=128 --policy.n_heads=4 \
-  --policy.dim_feedforward=512 --policy.n_encoder_layers=2 --policy.use_vae=false \
-  --batch_size=4 --num_workers=0 --seed=7 --steps=5000 --save_freq=5000 \
-  --output_dir="$TRAIN"
-
-find "$TRAIN/checkpoints" -type d -name pretrained_model
+git clone https://github.com/orcahand/orca_sim.git models/orca_sim
+git -C models/orca_sim checkout --detach 05e00dafd0a6eb2186d69d4e351c252a7bcffadd
 ```
 
-### Run a checkpoint in MuJoCo
+## Inspect the export
 
-Choose the printed checkpoint directory containing the weights, `config.json` and saved processors. Wei's Python adapter loads it directly. MuJoCo supplies the simulated hand and object states, the adapter normalizes those inputs, ACT selects an action, and the adapter converts that action back to the controller's units. Each new observation comes from the running simulation. There is no checkpoint-to-XML conversion or desktop import step.
-
-The supplied single-rollout adapter expects the Wei ORCA feature layout: 47 hand-state values, 14 environment-state values and 24 action values with the same ordering and units as the training data. Pair the recording with the model, task and calibration supported by your runner.
+Extract the Studio dataset ZIP. Set DATA to the directory containing wei-export.json, wei-manifest.json, meta/ and data/. Keep the original ZIP for provenance.
 
 ```bash
-CHECKPOINT=/absolute/path/to/pretrained_model
-EPISODE=/absolute/path/to/compatible-wei-recording.json
-RUN="$PWD/outputs/my-act-rollout"
-
-python scripts/orca-policy-rollout.py "$EPISODE" "$CHECKPOINT" \
-  --device cuda --seconds 15 --output "$RUN"
-cat "$RUN/report.json"
+mkdir -p data/my-export
+unzip my-studio-export.zip -d data/my-export
+find data/my-export -name wei-export.json
+DATA="$PWD/data/my-export"  # adjust if the archive contains a wrapper directory
+python scripts/wei.py inspect "$DATA"
 ```
 
-Use a new output directory for every run. The recording supplies the task setup. The checkpoint supplies the actions. The script writes a headless trajectory to `trajectory.json` on completion. In `report.json`, `pipeline_passed` means inference and simulation completed. Read `task_passed`, `gates` and `first_failing_stage` to see whether the grasp and placement succeeded. If initialization fails, read `error` and check the checkpoint, model assets and calibration fingerprints.
+Inspect checks the manifest and feature layout and lists the recording outcomes. The supported observation has 47 hand-state and 14 environment values. The action contains 24 values. Apple, bag, connector, two-hand and custom-scene exports require their own dynamics and task scoring.
+
+## Train ACT
+
+```bash
+python scripts/wei.py train "$DATA" --device cpu --steps 5000 --output outputs/act-01
+```
+
+Use --device cuda for GPU training. By default the trainer selects the episodes marked passed in the export. To choose demonstrations explicitly, append e.g. --episodes 0 2. For an independent evaluation, export held-out demonstrations separately. LeRobot uses the normalization statistics of the training export. Keep variations of each source demonstration in the same split. Pass the held-out dataset directory to evaluate. Training writes training-input.json with source episode metadata, the input hash and the command, and prints the checkpoint path. Keep the complete pretrained_model directory including its processors.
+
+## Test in closed loop
+
+```bash
+CHECKPOINT="$PWD/outputs/act-01/training/checkpoints/005000/pretrained_model"
+MUJOCO_GL=egl python scripts/wei.py evaluate "$DATA" --episode 0 \
+  --checkpoint "$CHECKPOINT" --seconds 15 --video --output outputs/rollout-01
+cat outputs/rollout-01/report.json
+```
+
+Choose a new output directory for each run. Omit --video to simulate without a graphics context or FFmpeg. The episode supplies the initial hand and block state and the tray pose. The block starts at rest because the export omits its velocity. Every policy decision uses a fresh simulated observation at the export frame rate. Commands are bounded by the exported joint ranges. A per-take VR restriction must be present in those ranges to carry into this test.
+
+Read pipeline_passed for execution status and task_passed for the manipulation outcome. Inspect gates and trajectory.json to diagnose contact, lift, release and final placement. rollout.mp4 visualizes the measured trajectory, including misses. Testing the same single demonstration used for training is a fit-and-rollout diagnostic. To measure generalization, evaluate held-out starts and count every completed trial.
 
 ## Tabletop pick-and-place results
 
