@@ -2,7 +2,9 @@
 
 Start with a Wei Studio **Table-v1 block pick-and-place** LeRobot export. The scripts train a state-based ACT policy on whole demonstrations and test the checkpoint on a simulated right Orca hand. You can run this workflow locally after recording, without a headset or a running Studio server.
 
-## Install on Linux or WSL2
+## Train a LeRobot ACT policy and run it in MuJoCo
+
+### Install on Linux or WSL2
 
 Run these commands from the root of this guide. Install Git, Python 3.12 or 3.13 with venv support, and FFmpeg (for MP4 output). For headless video, install an EGL graphics driver or Mesa EGL. Training and headless simulation can both use CPU. CUDA training requires a compatible PyTorch installation and driver.
 
@@ -58,3 +60,4 @@ The table-v1 policy picked up the block and placed it in the tray in **84 of 100
 The evaluation used 20 previously unseen nominal block placements with five seeded variations per placement. Variations changed block orientation and applied small position or velocity perturbations. The table, tray, controller, standardized initial hand posture and 15-second time limit were fixed. The result measures simulated performance within that setup.
 
 The command above demonstrates a single compatible rollout. Reproducing the reported aggregate requires the table-v1 evaluation runner, selected checkpoint and original trial schedule from the GPU experiment.
+
