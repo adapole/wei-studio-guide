@@ -47,7 +47,7 @@ def names():
     }
 
 
-def inspect(root):
+def inspect(root, *, for_rollout=False):
     metadata = read(root / "wei-export.json")
     manifest = read(root / "wei-manifest.json")
     listed = {r["path"]: r for r in manifest["files"]}
@@ -63,17 +63,31 @@ def inspect(root):
             "Export does not match wei-manifest.json. Extract a clean copy."
         )
     info = read(root / "meta/info.json")
-    if (
-        metadata["schema"] != "wei.dataset.export.v1"
-        or not metadata["stateOnly"]
-        or metadata["robotType"] != "orca-v2-right"
-        or metadata["robot"]["jointIds"] != JOINTS
-    ):
-        raise ValueError(
-            "Requires a state-only Studio export of the right Orca v2 hand."
-        )
+    if metadata["schema"] != "wei.dataset.export.v1" or not metadata["stateOnly"]:
+        raise ValueError("Expected a state-only Wei Studio dataset ZIP")
     if metadata["fps"] != info["fps"] or not 1 <= info["fps"] <= 240:
         raise ValueError("Invalid dataset sampling rate")
+    # ACT derives input/output widths from the dataset, including two-hand vectors.
+    for key in ("observation.state", "observation.environment_state", "action"):
+        feature = metadata["features"][key]
+        stored = info["features"][key]
+        if any(feature[k] != stored[k] for k in ("names", "shape", "dtype")):
+            raise ValueError(f"Export and LeRobot disagree about {key}")
+        if (
+            feature["dtype"] != "float32"
+            or len(feature["shape"]) != 1
+            or not feature["names"]
+            or feature["shape"] != [len(feature["names"])]
+            or len(set(feature["names"])) != len(feature["names"])
+        ):
+            raise ValueError(f"Expected named float32 vector for {key}")
+    if not for_rollout:
+        return metadata
+    if (
+        metadata["robotType"] != "orca-v2-right"
+        or metadata["robot"]["jointIds"] != JOINTS
+    ):
+        raise ValueError("This rollout requires the right Orca v2 hand")
     for key, expected in names().items():
         for feature in (metadata["features"][key], info["features"][key]):
             if (
@@ -85,7 +99,14 @@ def inspect(root):
     for e in metadata["episodeList"]:
         scene = e.get("scene") or metadata["scene"]
         if (
-            scene["taskVersion"] != "table-v1"
+            scene.get("taskVersion", scene.get("id")) != "table-v1"
+            or (
+                "taskVersion" not in scene
+                and (
+                    (e.get("evaluator") or {}).get("id") != "orca-table-v1-pick-place"
+                    or str(scene.get("revision")) != "1"
+                )
+            )
             or scene.get("taskId", "orca.block-pick-place") != "orca.block-pick-place"
             or (scene.get("lessonObject") or {}).get("id", "block") != "block"
         ):
@@ -110,6 +131,14 @@ def initial_conditions(root, metadata, index):
     state = row["observation.state"]
     env = row["observation.environment_state"]
     scene = episode.get("scene") or metadata["scene"]
+    if "taskVersion" not in scene:
+        # Studio worker exports identify the evaluated scene by profile and revision.
+        scene = {
+            **scene,
+            "trayCenter": env[7:9],
+            "trayFloorTop": env[9],
+            "blockSize": [0.045] * 3,
+        }
     if not np.allclose(
         env[7:14], [*scene["trayCenter"], scene["trayFloorTop"], 0, 0, 0, 1], atol=1e-5
     ):

@@ -222,7 +222,7 @@ def main():
             c.add_argument("--video", action="store_true")
     args = p.parse_args()
     args.dataset = args.dataset.resolve()
-    meta = inspect(args.dataset)
+    meta = inspect(args.dataset, for_rollout=args.command == "evaluate")
     if args.command == "inspect":
         print(
             json.dumps(
